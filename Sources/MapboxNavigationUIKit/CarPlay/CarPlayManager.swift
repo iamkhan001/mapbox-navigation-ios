@@ -141,6 +141,32 @@ public class CarPlayManager: NSObject {
         case .overview:
             break
         }
+
+        let traitCollection: UITraitCollection
+        if let carPlayNavigationViewController {
+            traitCollection = carPlayNavigationViewController.traitCollection
+        } else if let carPlayMapViewController {
+            traitCollection = carPlayMapViewController.traitCollection
+        } else {
+            assertionFailure("Panning interface is only supported for free-drive or active-guidance navigation.")
+            return
+        }
+
+        guard let mapTemplate = interfaceController?.rootTemplate as? CPMapTemplate,
+              let activity = mapTemplate.currentActivity
+        else {
+            return
+        }
+
+        if let buttons = delegate?.carPlayManager(
+            self,
+            leadingNavigationBarButtonsCompatibleWith: traitCollection,
+            in: mapTemplate,
+            for: activity,
+            cameraState: state
+        ) {
+            mapTemplate.leadingNavigationBarButtons = buttons
+        }
     }
 
     // MARK: Map Configuration
@@ -229,18 +255,23 @@ public class CarPlayManager: NSObject {
         )
 
         let altsButton = CPBarButton(title: title) { [weak self] (_: CPBarButton) in
-            guard let template = self?.carPlayNavigationViewController?.alternativesListTemplate() else {
-                return
-            }
-            self?.interfaceController?.pushTemplate(
-                template,
-                animated: true,
-                completion: nil
-            )
+            self?.showAlternativesListTemplate()
         }
 
         return altsButton
     }()
+
+    @_spi(MapboxInternal)
+    public func showAlternativesListTemplate() {
+        guard let template = carPlayNavigationViewController?.alternativesListTemplate() else {
+            return
+        }
+        interfaceController?.pushTemplate(
+            template,
+            animated: true,
+            completion: nil
+        )
+    }
 
     /// The bar button that prompts the presented navigation view controller to display the feedback screen.
     public lazy var showFeedbackButton: CPMapButton = {
@@ -1459,6 +1490,14 @@ extension CarPlayManager: CarPlayMapViewControllerDelegate {
             sourceIdentifier: sourceIdentifier
         )
     }
+
+    @_spi(MapboxInternal)
+    public func carPlayMapViewController(
+        _ carPlayMapViewController: CarPlayMapViewController,
+        didSetup navigationMapView: NavigationMapView
+    ) {
+        delegate?.carPlayManager(self, didSetup: navigationMapView)
+    }
 }
 
 // MARK: MapTemplateProviderDelegate Methods
@@ -1516,7 +1555,6 @@ extension CarPlayManager {
         carPlayMapViewController.delegate = self
         window.rootViewController = carPlayMapViewController
         carWindow = window
-
         let mapTemplate = previewMapTemplate()
         mainMapTemplate = mapTemplate
         interfaceController.setRootTemplate(mapTemplate, animated: false, completion: nil)

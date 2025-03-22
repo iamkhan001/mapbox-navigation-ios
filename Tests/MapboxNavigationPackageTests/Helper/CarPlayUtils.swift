@@ -54,6 +54,7 @@ func createValidRouteChoice() async -> CPRouteChoice {
     )
     let routes = await createNavigationRoutes()
     let routeResponseUserInfoKey = CPRouteChoice.RouteResponseUserInfo.key
+
     let routeResponseUserInfo: CPRouteChoice.RouteResponseUserInfo = .init(
         navigationRoutes: routes,
         searchResultRecord: nil
@@ -184,6 +185,8 @@ class CarPlayManagerDelegateSpy: CarPlayManagerDelegate {
         returnedLeadingBarButtons
     }
 
+    func carPlayManager(_ carPlayManager: CarPlayManager, didSetup navigationMapView: NavigationMapView) {}
+
     func carPlayManager(
         _ carPlayManager: CarPlayManager,
         leadingNavigationBarButtonsCompatibleWith traitCollection: UITraitCollection,
@@ -269,6 +272,16 @@ class CarPlayManagerDelegateSpy: CarPlayManagerDelegate {
     ) {
         didDismissPanningInterfaceCalled = true
         passedTemplate = template
+    }
+
+    func carPlayManager(
+        _ carPlayManager: MapboxNavigationUIKit.CarPlayManager,
+        leadingNavigationBarButtonsCompatibleWith traitCollection: UITraitCollection,
+        in carPlayTemplate: CPMapTemplate,
+        for activity: MapboxNavigationUIKit.CarPlayActivity,
+        cameraState: MapboxNavigationCore.NavigationCameraState
+    ) -> [CPBarButton]? {
+        return nil
     }
 }
 

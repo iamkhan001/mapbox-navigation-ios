@@ -3,11 +3,22 @@ import Turf
 import XCTest
 
 class WaypointTests: XCTestCase {
+    let timeZoneRepresentation = TimeZoneInformation(
+        identifier: "Europe/Paris",
+        offset: "-05:00",
+        abbreviation: "CEST"
+    )
+
     func testCoding() {
         let waypointJSON: [String: Any?] = [
             "location": [-77.036500000000004, 38.8977],
             "name": "White House",
             "distance": 7,
+            "time_zone": [
+                "identifier": timeZoneRepresentation.identifier,
+                "offset": timeZoneRepresentation.offset,
+                "abbreviation": timeZoneRepresentation.abbreviation,
+            ],
         ]
         let waypointData = try! JSONSerialization.data(withJSONObject: waypointJSON, options: [])
         var waypoint: Waypoint?
@@ -25,6 +36,9 @@ class WaypointTests: XCTestCase {
             XCTAssertTrue(waypoint.allowsArrivingOnOppositeSide)
             XCTAssertTrue(waypoint.separatesLegs)
             XCTAssertEqual(waypoint.snappedDistance, 7.0)
+            XCTAssertNotNil(waypoint.timeZone)
+            XCTAssertEqual(waypoint.timeZone, timeZoneRepresentation)
+            XCTAssertNotNil(waypoint.timeZone?.timeZone)
             XCTAssertNil(waypoint.layer)
         }
 
@@ -39,6 +53,7 @@ class WaypointTests: XCTestCase {
         waypoint?.allowsArrivingOnOppositeSide = false
         waypoint?.snappedDistance = 7
         waypoint?.layer = -1
+        waypoint?.timeZone = timeZoneRepresentation
 
         let encoder = JSONEncoder()
         var encodedData: Data?
@@ -126,7 +141,7 @@ class WaypointTests: XCTestCase {
     }
 
     func testEquality() {
-        let left = Waypoint(
+        var left = Waypoint(
             coordinate: LocationCoordinate2D(latitude: 0, longitude: 0),
             coordinateAccuracy: nil,
             name: nil
@@ -144,6 +159,28 @@ class WaypointTests: XCTestCase {
         XCTAssertNotEqual(left, right)
 
         right = Waypoint(coordinate: LocationCoordinate2D(latitude: 0, longitude: 0), coordinateAccuracy: nil, name: "")
+        XCTAssertNotEqual(left, right)
+
+        right = Waypoint(
+            coordinate: LocationCoordinate2D(latitude: 1, longitude: 0),
+            coordinateAccuracy: nil,
+            name: nil
+        )
+        right.timeZone = timeZoneRepresentation
+
+        left = Waypoint(coordinate: LocationCoordinate2D(latitude: 1, longitude: 0), coordinateAccuracy: nil, name: nil)
+        left.timeZone = timeZoneRepresentation
+        XCTAssertEqual(left, right)
+
+        right = Waypoint(
+            coordinate: LocationCoordinate2D(latitude: 1, longitude: 0),
+            coordinateAccuracy: nil,
+            name: nil
+        )
+        right.timeZone = timeZoneRepresentation
+
+        left = Waypoint(coordinate: LocationCoordinate2D(latitude: 1, longitude: 0), coordinateAccuracy: nil, name: nil)
+        left.timeZone = TimeZoneInformation(identifier: "n/a", offset: "", abbreviation: nil)
         XCTAssertNotEqual(left, right)
     }
 
@@ -234,5 +271,28 @@ class WaypointTests: XCTestCase {
         XCTAssertEqual(matchOptions.urlQueryItems.first { $0.name == "snapping_include_closures" }?.value, nil)
         XCTAssertEqual(routeOptions.urlQueryItems.first { $0.name == "snapping_include_static_closures" }?.value, nil)
         XCTAssertEqual(matchOptions.urlQueryItems.first { $0.name == "snapping_include_static_closures" }?.value, nil)
+    }
+
+    func testApplyWaypointTargetCoordinatesOnCorrespondingWaypoint() {
+        let origin = Waypoint(
+            coordinate: .init(latitude: 36.162569, longitude: -86.7821)
+        )
+        let destination = Waypoint(
+            coordinate: .init(latitude: 36.152638, longitude: -86.790639)
+        )
+
+        let targetLat = 36.152884
+        let targetLon = -86.790838
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "waypoint_targets", value: ";\(targetLon),\(targetLat)"),
+        ]
+
+        let options = RouteOptions(waypoints: [origin, destination], queryItems: queryItems)
+        XCTAssertNil(options.waypoints[0].targetCoordinate)
+        XCTAssertNotNil(options.waypoints[1].targetCoordinate)
+        XCTAssertEqual(
+            options.waypoints[1].targetCoordinate,
+            LocationCoordinate2D(latitude: targetLat, longitude: targetLon)
+        )
     }
 }

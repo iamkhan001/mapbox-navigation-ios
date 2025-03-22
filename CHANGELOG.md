@@ -1,11 +1,54 @@
 # Changes to the Mapbox Navigation SDK for iOS
 
+## v3.8.0-rc.1
+
+### Packaging
+
+* MapboxNavigationCore now requires [MapboxMaps v11.11.0-rc.1](https://github.com/mapbox/mapbox-maps-ios/releases/tag/v11.11.0-rc.1).
+* MapboxNavigationCore now requires [MapboxNavigationNative v324.0.0-rc.2](https://github.com/mapbox/mapbox-navigation-native-ios/releases/tag/v324.0.0-rc.2).
+
+### Other changes
+
+* Fixed the crash on `RouteOptions` initialization with url query items with invalid target coordinates parameters set. The failure pattern is:
+   * Use the `RouteOptions.init(waypoints:profileIdentifier:queryItems:)` initializer.
+   * Build options with wayipoints treated as a stops. More information here: [Silent waypoints](https://docs.mapbox.com/ios/navigation/guides/turn-by-turn-navigation/route-generation/#silent-waypoints)
+   * Provide optional parameter `waypoint_targets` query item with empty data for at least one waypoint. It may look like this: `waypoint_targets=;-86.790838,36.152884`. More information here: [Optional parameters](https://docs.mapbox.com/api/navigation/directions/#optional-parameters)
+ 
+## v3.8.0-beta.1
+
+### Packaging
+
+* MapboxNavigationCore now requires [MapboxMaps v11.11.0-beta.1](https://github.com/mapbox/mapbox-maps-ios/releases/tag/v11.11.0-beta.1).
+* MapboxNavigationCore now requires [MapboxNavigationNative v324.0.0-beta.1](https://github.com/mapbox/mapbox-navigation-native-ios/releases/tag/324.0.0-beta.1).
+
+### Audio
+
+* Improved AVAudioSession handling for playback of the reroute sound and voice instructions. Activation and deactivation of AVAudioSession no longer occur on the main thread, and these operations are synchronized. This eliminates UI freezes that occurred to a lesser extent during activation and to a greater extent during deactivation.
+
+### Routing
+
+* `Waypoint` object is extended with `TimeZoneInformation`.
+
+### API Deprecations
+
+* The extension for AVAudioSession is no longer supported and has been deprecated, which affects the following methods:
+    * `AVAudioSession.tryDuckAudio()`
+    * `AVAudioSession.tryUnduckAudio()`
+    
+### CarPlay
+
+* Forwarded shapes for waypoints from `CarPlayNavigationViewControllerDelegate` to `NavigationMapViewDelegate`.
+
+### Simulation
+
+* Fixed case when route refresh or an alternative route selection causes the simulation progress reset.
+
 ## v3.7.0
 
 ### Packaging
 
-* MapboxNavigationCore now requires [MapboxMaps v11.10.0-rc.1](https://github.com/mapbox/mapbox-maps-ios/releases/tag/v11.10.0-rc.1).
-* MapboxNavigationCore now requires [MapboxNavigationNative v323.0.0-rc.1](https://github.com/mapbox/mapbox-navigation-native-ios/releases/tag/323.0.0-rc.1).
+* MapboxNavigationCore now requires [MapboxMaps v11.10.0](https://github.com/mapbox/mapbox-maps-ios/releases/tag/v11.10.0).
+* MapboxNavigationCore now requires [MapboxNavigationNative v323.0.0](https://github.com/mapbox/mapbox-navigation-native-ios/releases/tag/323.0.0).
 
 ### API deprecations:
 
@@ -34,6 +77,7 @@
 * Fixed possible not thread-safe memory access in `SimulatedLocationManager`.
 * Improved route refreshing by removing unnecessary internal navigator update on refresh.
 * Fixed possible not thread-safe memory access to `RouteProgress` in `NavigationController`.
+
 
 ## v3.7.0-rc.1
 

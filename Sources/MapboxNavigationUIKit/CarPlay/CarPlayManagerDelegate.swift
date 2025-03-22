@@ -643,6 +643,21 @@ public protocol CarPlayManagerDelegate: AnyObject, UnimplementedLogging {
         _ carPlayManager: CarPlayManager,
         guidanceBackgroundColorFor style: UIUserInterfaceStyle
     ) -> UIColor?
+
+    @_spi(MapboxInternal)
+    func carPlayManager(
+        _ carPlayManager: CarPlayManager,
+        didSetup navigationMapView: NavigationMapView
+    )
+
+    @_spi(MapboxInternal)
+    func carPlayManager(
+        _ carPlayManager: CarPlayManager,
+        leadingNavigationBarButtonsCompatibleWith traitCollection: UITraitCollection,
+        in carPlayTemplate: CPMapTemplate,
+        for activity: CarPlayActivity,
+        cameraState: NavigationCameraState
+    ) -> [CPBarButton]?
 }
 
 extension CarPlayManagerDelegate {
@@ -1006,6 +1021,26 @@ extension CarPlayManagerDelegate {
         _ carPlayManager: CarPlayManager,
         guidanceBackgroundColorFor style: UIUserInterfaceStyle
     ) -> UIColor? {
+        logUnimplemented(protocolType: CarPlayManagerDelegate.self, level: .debug)
+        return nil
+    }
+
+    @_spi(MapboxInternal)
+    public func carPlayManager(
+        _ carPlayManager: CarPlayManager,
+        didSetup navigationMapView: NavigationMapView
+    ) {
+        logUnimplemented(protocolType: CarPlayManagerDelegate.self, level: .debug)
+    }
+
+    @_spi(MapboxInternal)
+    public func carPlayManager(
+        _ carPlayManager: CarPlayManager,
+        leadingNavigationBarButtonsCompatibleWith traitCollection: UITraitCollection,
+        in carPlayTemplate: CPMapTemplate,
+        for activity: CarPlayActivity,
+        cameraState: NavigationCameraState
+    ) -> [CPBarButton]? {
         logUnimplemented(protocolType: CarPlayManagerDelegate.self, level: .debug)
         return nil
     }

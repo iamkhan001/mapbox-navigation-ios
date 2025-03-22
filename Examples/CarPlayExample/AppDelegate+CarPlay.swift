@@ -93,6 +93,18 @@ class CarPlaySceneDelegate: NSObject, CPTemplateApplicationSceneDelegate {
 
 extension AppDelegate: CarPlayManagerDelegate {
     func carPlayManager(
+        _ carPlayManager: MapboxNavigationUIKit.CarPlayManager,
+        leadingNavigationBarButtonsCompatibleWith traitCollection: UITraitCollection,
+        in carPlayTemplate: CPMapTemplate,
+        for activity: MapboxNavigationUIKit.CarPlayActivity,
+        cameraState: MapboxNavigationCore.NavigationCameraState
+    ) -> [CPBarButton]? {
+        return nil
+    }
+
+    func carPlayManager(_ carPlayManager: CarPlayManager, didSetup navigationMapView: NavigationMapView) {}
+
+    func carPlayManager(
         _ carPlayManager: CarPlayManager,
         selectedPreviewFor trip: CPTrip,
         using routeChoice: CPRouteChoice
