@@ -118,7 +118,23 @@ public final class MapboxNavigationProvider {
     }
 
     // MARK: - Instance Lifecycle control
+    public static var shared: MapboxNavigationProvider?
 
+    public static func createInstance(coreConfig: CoreConfig) -> MapboxNavigationProvider {
+        if let instance = shared {
+            return instance
+        } else {
+            let newInstance = MapboxNavigationProvider(coreConfig: coreConfig)
+            shared = newInstance
+            return newInstance
+        }
+    }
+
+    public static func destroyInstance() {
+        shared?.unregisterUniqueInstance()
+        shared = nil
+    }
+    
     private static let hasInstance: NSLocked<Bool> = .init(false)
 
     private static func checkInstanceIsUnique() {
